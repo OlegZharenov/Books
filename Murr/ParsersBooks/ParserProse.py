@@ -7,18 +7,21 @@ URL = 'https://mybook.ru/catalog/sovremennaya-proza/books/' # ссылка, ко
 headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
            , 'accept': '*/*'} #Словарь с заголовками, чтобы сервер не посчитал нас за бота. Имитируем работу браузера
 host = 'https://mybook.ru'
-count = 0
+count = 1
+category = ''
 
 
+URLS = []
 books = []
 links_page = []
 links_image = []
-titles = []
-authors = []
-ratings = []
-descriptions = []
-year_of_creations = []
-size = []
+
+
+def pages_with_books():
+    html = get_url(URL)
+    count_page = get_pages_count(html.text)
+    for number in range(1, count_page+1):
+        URLS.append(f'https://mybook.ru/catalog/sovremennaya-proza/books/?page={number}')
 
 
 def get_url(url, params = None): #params для передачи номеров страниц
@@ -29,11 +32,12 @@ def get_url(url, params = None): #params для передачи номеров 
 def get_image_link(html_book):#получаем ссылки на изображения
     soup_image = BeautifulSoup(html_book.text, 'html.parser')
     link_image = soup_image.find_all('img', class_ = 'BookCoverImage__coverImage BookCoverImage__coverImageText')
-    for l_i in link_image:
-        links_image.append(l_i['src'])
+    for image in link_image:
+        links_image.append(image['src'])
+    return links_image[-1]
 
 
-def get_url_image(url_img):#Функция, для того, чтобы отправить корректный запрос длля картинки
+def get_url_image(url_img):#Функция, для того, чтобы отправить корректный запрос для картинки
     req_img = requests.get(url_img, stream = True)
     return req_img
 
@@ -59,52 +63,71 @@ def get_image_content(count):#Итерируясь по ссылкам скач�
         count = count + 1
 
 
-
 def get_link_pages_book(html):#собираем ссылки со страниц, на которых подробная информация о книгах и парсим контент
     soup = BeautifulSoup(html, 'html.parser') #тип документа с которым работаем. Через soup создаются объекты python с которыми мы можем работать
+    category = soup.find('div', class_ = 'sectionHeader')
+    category = category.text.split('«')[-1][0:-1]
     divs = soup.find_all('div', class_ = 'ContextBookCardLong__bookTitle')
     for div in divs:
         links_page.append(host + div.find('a').get('href'))
-    get_content()
+    get_content(category)
     get_image_content(count)
+    links_page.clear()
 
 
-def get_content():#собираем ТЕКСТОВУЮ информацию со страницы, где подробная информация о книгах
-    description_book = ''
+def get_content(category):#собираем ТЕКСТОВУЮ информацию со страницы, где подробная информация о книгах
     for link in links_page:
+        description_book = ''
+        size = ''
+        year_of_creations = ''
         html_book = get_url(link)
-        get_image_link(html_book)#Собираем ссылки обложек
+        image = get_image_link(html_book)#Собираем ссылки обложек
         soup_book = BeautifulSoup(html_book.text, 'html.parser')
         titles_book = soup_book.find('h1', class_='BookPageHeaderContent__coverTitle').text
         author_book = soup_book.find('a', class_='BookAuthor__authorName').text
-        rating = soup_book.find('span', class_='BookPageHeaderContent__bookRatingCount').text
-        titles.append(titles_book)
-        authors.append(author_book)
-        ratings.append('Рейтинг: '+ rating)
+        rating = 'Рейтинг: ' + soup_book.find('span', class_='BookPageHeaderContent__bookRatingCount').text
         information_book = soup_book.find('div', class_ = 'BookDetailAnnotation__descriptionWrapper')
         for description in information_book.find_all('p'):
             if 'MyBook.ru' in description.text or 'Год издания' in description.text or 'ISBN' in description.text or 'Дата поступления' in description.text or 'Купить книгу' in description.text:
                 continue
             if 'Дата написания:' in description.text:
-                year_of_creations.append(description.text)
+                year_of_creations = description.text
                 continue
             if 'Объем:' in description.text:
-                size.append(description.text)
+                size = description.text
                 continue
             description_book = description_book + description.text + '\n'
-        descriptions.append(description_book)
-    #print(descriptions)
-    #print(year_of_creations)
-    #print(size)
-    #print(links_page.text)
-    #print(links_image)
+        if size == '':
+            size = 'Объем книги неизвестен.'
+        if year_of_creations == '':
+            year_of_creations = 'Год написания книги неизвестен.'
+        if description_book == '':
+            description_book = 'Описание отсутствует.'
+        books.append({'title': titles_book, 'author' : author_book, 'genre': category, 'rating': rating,
+                      'year': year_of_creations, 'size': size, 'description': description_book, 'img': image })
+
+
+def get_pages_count(html):
+    soup = BeautifulSoup(html, 'html.parser') #тип документа с которым работаем. Через soup создаются объекты python с которыми мы можем работать
+    pagenation = soup.find_all('span', class_ = 'PageButton__button')
+    max_count = int(pagenation[-1].get_text())
+    if max_count>5:
+        return 5
+    else:
+        return max_count
 
 
 def parse():
     html = get_url(URL)
     if html.status_code == 200:
-        get_link_pages_book(html.text)
+        count_page = get_pages_count(html.text)
+        pages_with_books()
+        for url in URLS:
+            html = get_url(url)
+            get_link_pages_book(html.text)
     else:
         print("ERROR!")
+    print(books)
+
 
 parse()
