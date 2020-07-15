@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import os
 
 
-URL = 'https://mybook.ru/catalog/sovremennaya-proza/books/' # ссылка, которую парсим
+URL = 'https://mybook.ru/catalog/istoriya/books/' # ссылка, которую парсим
 headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
            , 'accept': '*/*'} #Словарь с заголовками, чтобы сервер не посчитал нас за бота. Имитируем работу браузера
 host = 'https://mybook.ru'
@@ -19,9 +19,10 @@ links_image = []
 
 def pages_with_books():
     html = get_url(URL)
+    url_page = URL + '?page='
     count_page = get_pages_count(html.text)
     for number in range(1, count_page+1):
-        URLS.append(f'https://mybook.ru/catalog/sovremennaya-proza/books/?page={number}')
+        URLS.append(url_page+str(number))
 
 
 def get_url(url, params = None): #params для передачи номеров страниц
@@ -104,15 +105,15 @@ def get_content(category):#собираем ТЕКСТОВУЮ информац�
         if description_book == '':
             description_book = 'Описание отсутствует.'
         books.append({'title': titles_book, 'author' : author_book, 'genre': category, 'rating': rating,
-                      'year': year_of_creations, 'size': size, 'description': description_book, 'img': image })
+                      'year': year_of_creations, 'size': size, 'description': description_book, 'img': image, 'link': link})
 
 
 def get_pages_count(html):
     soup = BeautifulSoup(html, 'html.parser') #тип документа с которым работаем. Через soup создаются объекты python с которыми мы можем работать
     pagenation = soup.find_all('span', class_ = 'PageButton__button')
     max_count = int(pagenation[-1].get_text())
-    if max_count>5:
-        return 5
+    if max_count>6:
+        return 6
     else:
         return max_count
 
