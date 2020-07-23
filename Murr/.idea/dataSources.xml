@@ -10,11 +10,11 @@
         <property name="enable_load_extension" value="true" />
       </driver-properties>
     </data-source>
-    <data-source source="LOCAL" name="one.sqlite" uuid="53251867-d4ff-4642-90dc-f683b35c13e4">
+    <data-source source="LOCAL" name="two.sqlite" uuid="91693228-1874-4754-bf3b-f73a13305ea4">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:one.sqlite</jdbc-url>
+      <jdbc-url>jdbc:sqlite:two.sqlite</jdbc-url>
       <driver-properties>
         <property name="enable_load_extension" value="true" />
       </driver-properties>

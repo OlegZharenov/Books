@@ -44,6 +44,12 @@ def get_url(url, params = None): #params для передачи номеров 
 def get_image_link(html_book):#получаем ссылки на изображения
     soup_image = BeautifulSoup(html_book.text, 'html.parser')
     link_image = soup_image.find_all('img', class_ = 'BookCoverImage__coverImage BookCoverImage__coverImageText')
+    if link_image == []:
+        link_image = soup_image.find_all('img', class_ = 'BookCoverImage__coverImage BookCoverImage__coverImageAudio')
+        for image in link_image:
+            href = image['srcset'][:-3]
+            links_image.append(href)
+        return links_image[-1]
     for image in link_image:
         links_image.append(image['src'])
     return links_image[-1]
@@ -96,7 +102,8 @@ def get_content(category):#собираем ТЕКСТОВУЮ информац�
         image = get_image_link(html_book)#Собираем ссылки обложек
         soup_book = BeautifulSoup(html_book.text, 'html.parser')
         titles_book = soup_book.find('h1', class_='BookPageHeaderContent__coverTitle').text
-        slug = get_slug(titles_book)
+        slug_title = get_slug(titles_book)
+        slug_genre = get_slug(category)
         author_book = soup_book.find('a', class_='BookAuthor__authorName').text
         rating = 'Рейтинг: ' + soup_book.find('span', class_='BookPageHeaderContent__bookRatingCount').text
         information_book = soup_book.find('div', class_ = 'BookDetailAnnotation__descriptionWrapper')
@@ -116,16 +123,27 @@ def get_content(category):#собираем ТЕКСТОВУЮ информац�
             year_of_creations = 'Год написания книги неизвестен.'
         if description_book == '':
             description_book = 'Описание отсутствует.'
-        books.append({'title': titles_book, 'author' : author_book, 'genre': category, 'rating': rating,
-                      'year': year_of_creations, 'size': size, 'description': description_book, 'img': image, 'link': link, 'slug':slug})
+        if len(books) == 0:
+            books.append({'title': titles_book, 'author': author_book, 'genre': category, 'rating': rating,
+                          'year': year_of_creations, 'size': size, 'description': description_book, 'img': image,
+                          'link': link, 'slug_title': slug_title, 'slug_genre': slug_genre})
+        else:
+            for i in range(len(books)):
+                if titles_book not in books[i]['title']:
+                    books.append({'title': titles_book, 'author': author_book, 'genre': category, 'rating': rating,
+                                  'year': year_of_creations, 'size': size, 'description': description_book,
+                                  'img': image, 'link': link, 'slug_title': slug_title, 'slug_genre': slug_genre})
+                    break
+                else:
+                    print('не добавилось')
 
 
 def get_pages_count(html):
     soup = BeautifulSoup(html, 'html.parser') #тип документа с которым работаем. Через soup создаются объекты python с которыми мы можем работать
     pagenation = soup.find_all('span', class_ = 'PageButton__button')
     max_count = int(pagenation[-1].get_text())
-    if max_count>1:
-        return 1
+    if max_count > 3:
+        return 3
     else:
         return max_count
 
@@ -142,7 +160,8 @@ def parse():
         else:
             print("ERROR!")
         URLS.clear()
-    print(books)
+    #print(books)
+    #print(len(books))
 
 
 parse()

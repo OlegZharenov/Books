@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <img src="{{ post.link }}" class="card-img-top" alt="...">
+    </div>
+    <div class="col order-1">
+        <nav id="navbar-example3" class="navbar navbar-light bg-light">
+          <nav class="nav nav-pills flex-column">
+            <a class="nav-link" href="#item-1">Название</a>
+            <nav class="nav nav-pills flex-column">
+            </nav>
+            <a class="nav-link" href="#item-2">Автор</a>
+            <a class="nav-link" href="#item-3">Жанр</a>
+            <a class="nav-link" href="#item-4">Описание</a>
+            <a class="nav-link" href="#item-5">Общая информация</a>
+
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link ml-3 my-1" href="#item-5-1">Год написания</a>
+              <a class="nav-link ml-3 my-1" href="#item-5-2">Рейтинг</a>
+              <a class="nav-link ml-3 my-1" href="#item-5-3">Объем</a>
+            </nav>
+          </nav>
+        </nav>
+    </div>
+
+
+      <div class="col order-12">
+        <div data-spy="scroll" data-target="#navbar-example3" data-offset="0">
+          <h4 id="item-1">Название</h4>
+          <p>{{ post.title }}</p>
+          <h4 id="item-2">Автор</h4>
+          <p>{{ post.author }}</p>
+          <h4 id="item-3">Жанр</h4>
+          <p> {{ post.genre }}</p>
+           <h4 id="item-4">Описание</h4>
+           <p> {{ post.description }}</p>
+          <h5 id="item-5-1">Год написания</h5>
+          <p>{{ post.year }}</p>
+          <h5 id="item-5-2">Рейтинг</h5>
+          <p>{{ post.rating }}</p>
+            <h5 id="item-5-3">Объем 5-2</h5>
+          <p>{{ post.size }}</p>
+        </div>
+    </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

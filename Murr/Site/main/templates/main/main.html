@@ -1,0 +1,25 @@
+{%  extends 'base.html'%}}
+{% block title %}
+Главная
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-6 offset-md-4">
+    {% for post in posts%}
+    <div class="card text-center" style="width: 18rem;">
+      <img src="{{ post.link }}" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">
+            <strong> {{ post.title }}</strong>
+        </h5>
+        <p class="card-text">{{ post.genre }}</p>
+        <a href="{% url 'post.url' slug=post.slug %}" class="btn btn-primary">Перейти к книге</a>
+      </div>
+    </div>
+    <br>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
