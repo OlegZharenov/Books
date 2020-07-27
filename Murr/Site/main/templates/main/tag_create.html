@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}
+Категории
+{% endblock %}
+{% block content %}
+{% for field in form %}
+    <form action="{% url 'tag_create.url' %}" method="post">
+        <div class="col-6 offset-md-3">
+            {% csrf_token %}
+            {% if field.errors %}
+            <div class="alert alert-danger">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+            {{ field.label }}
+            {{ field }}
+        </div>
+        <br>
+{% endfor %}
+    <br>
+        <div class="col-6 offset-md-3">
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </div>
+    </form>
+{% endblock %}

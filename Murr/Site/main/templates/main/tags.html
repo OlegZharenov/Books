@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+Категории
+{% endblock %}
+{% block content %}
+{% for tag in tags %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+        <img width = "30" height = "365" src="{{ tag.image }}" class="card-img-top" alt="...">
+    </div>
+      <div class="col order-1">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title">{{tag.title}}</h5>
+            <p class="card-text">{{ tag.description }}</p>
+            <a href="{% url 'tag.url' slug=tag.slug %}" class="btn btn-primary">Перейти к книгам</a>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+<br><br>
+{% endfor %}
+{% endblock %}
